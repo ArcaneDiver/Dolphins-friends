@@ -1,0 +1,11 @@
+{
+
+  "entity.dolphins_friends.ridable_dolphin": "Dolphin",
+
+  "item.dolphins_friends.sonar": "Sonar",
+
+  "itemGroup.dolphins_friends": "Dolphin's friends",
+
+  "key.categories.dolphins_friends": "Dolphin's friends",
+  "key.dolphins_friends.sonar": "Sonar"
+}
