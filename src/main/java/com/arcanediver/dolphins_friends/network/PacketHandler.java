@@ -2,6 +2,7 @@ package com.arcanediver.dolphins_friends.network;
 
 import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.network.message.IMessage;
+import com.arcanediver.dolphins_friends.network.message.MessageOpenDolphinInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -21,6 +22,8 @@ public class PacketHandler {
                 .clientAcceptedVersions(PROTOCOL_VERSION::equals)
                 .serverAcceptedVersions(PROTOCOL_VERSION::equals)
                 .simpleChannel();
+
+        register(MessageOpenDolphinInventory.class, new MessageOpenDolphinInventory());
     }
 
     private static <T> void register(Class<T> clazz, IMessage<T> message)

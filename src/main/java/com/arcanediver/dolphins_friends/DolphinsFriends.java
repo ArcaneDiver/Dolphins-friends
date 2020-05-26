@@ -2,25 +2,19 @@ package com.arcanediver.dolphins_friends;
 
 import com.arcanediver.dolphins_friends.client.renders.RenderRegistry;
 import com.arcanediver.dolphins_friends.client.screen.RidableDolphinScreen;
+import com.arcanediver.dolphins_friends.common.CommonEvents;
 import com.arcanediver.dolphins_friends.common.entity.EntitySonarDataHandler;
-import com.arcanediver.dolphins_friends.event.DolphinEventHandler;
-import com.arcanediver.dolphins_friends.event.TickEventHandler;
+import com.arcanediver.dolphins_friends.common.DolphinEventHandler;
+import com.arcanediver.dolphins_friends.common.TickEventHandler;
 import com.arcanediver.dolphins_friends.init.ModContainers;
 import com.arcanediver.dolphins_friends.init.ModEntities;
 import com.arcanediver.dolphins_friends.init.ModItems;
-import com.arcanediver.dolphins_friends.inventory.container.RidableDolphinContainer;
 import com.arcanediver.dolphins_friends.network.PacketHandler;
 import com.arcanediver.dolphins_friends.utils.RegistryHandler;
-import mezz.jei.api.JeiPlugin;
 import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.gui.screen.inventory.HorseInventoryScreen;
-import net.minecraft.inventory.container.HorseInventoryContainer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.gen.IWorldGenerationReader;
-import net.minecraft.world.gen.feature.structure.IglooStructure;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -53,10 +47,12 @@ public class DolphinsFriends {
 
         MinecraftForge.EVENT_BUS.register(DolphinEventHandler.class);
         MinecraftForge.EVENT_BUS.register(TickEventHandler.class);
+        MinecraftForge.EVENT_BUS.register(CommonEvents.class);
     }
 
     public void onClientSetup(FMLCommonSetupEvent event) {
         ClientRegistry.registerKeyBinding(DolphinEventHandler.KEY_SONAR);
+        ClientRegistry.registerKeyBinding(DolphinEventHandler.KEY_INVENTORY);
 
         ScreenManager.registerFactory(ModContainers.RIDABLE_DOLPHIN.get(), RidableDolphinScreen::new);
     }
@@ -65,6 +61,7 @@ public class DolphinsFriends {
         RenderRegistry.registryRenders();
         PacketHandler.register();
         EntitySonarDataHandler.register();
+
     }
 
 

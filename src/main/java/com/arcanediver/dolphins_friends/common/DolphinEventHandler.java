@@ -1,4 +1,4 @@
-package com.arcanediver.dolphins_friends.event;
+package com.arcanediver.dolphins_friends.common;
 
 
 import com.arcanediver.dolphins_friends.DolphinsFriends;
@@ -7,6 +7,8 @@ import com.arcanediver.dolphins_friends.common.entity.EntitySonarDataHandler;
 import com.arcanediver.dolphins_friends.entity.RidableDolphinEnitity;
 import com.arcanediver.dolphins_friends.init.ModEntities;
 import com.arcanediver.dolphins_friends.inventory.container.RidableDolphinContainer;
+import com.arcanediver.dolphins_friends.network.PacketHandler;
+import com.arcanediver.dolphins_friends.network.message.MessageOpenDolphinInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.Screen;
@@ -20,19 +22,23 @@ import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.*;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import org.lwjgl.glfw.GLFW;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +47,7 @@ import java.util.UUID;
 public class DolphinEventHandler {
 
     public static final KeyBinding KEY_SONAR = new KeyBinding(String.format("key.%s.sonar", DolphinsFriends.MOD_ID), GLFW.GLFW_KEY_U, String.format("key.categories.%s", DolphinsFriends.MOD_ID));
+    public static final KeyBinding KEY_INVENTORY = new KeyBinding(String.format("key.%s.inventory", DolphinsFriends.MOD_ID), GLFW.GLFW_KEY_I, String.format("key.categories.%s", DolphinsFriends.MOD_ID));
 
     @SubscribeEvent
     public static void onDolphinInteract(PlayerInteractEvent.EntityInteract e) {
@@ -51,13 +58,13 @@ public class DolphinEventHandler {
             PlayerEntity player = e.getPlayer();
 
             if (player != null && player.getRidingEntity() == null && !worldIn.isRemote) {
-
                 RidableDolphinEnitity sobstitue = new RidableDolphinEnitity(ModEntities.RIDABLE_DOLPHIN.get(), worldIn);
                 sobstitue.setPosition(dolphinEntity.getPosX(), dolphinEntity.getPosY(), dolphinEntity.getPosZ());
                 worldIn.addEntity(sobstitue);
                 player.startRiding(sobstitue);
                 dolphinEntity.remove();
             }
+
 
         }
     }
@@ -85,7 +92,7 @@ public class DolphinEventHandler {
 
             ClientPlayerEntity player = Minecraft.getInstance().player;
 
-            if(player != null && player.getRidingEntity() != null && player.getRidingEntity() instanceof RidableDolphinEnitity) {
+            if(player != null && player.getRidingEntity() instanceof RidableDolphinEnitity) {
                 RidableDolphinEnitity dolphin = (RidableDolphinEnitity) player.getRidingEntity();
 
                 World world = Minecraft.getInstance().world;
@@ -130,39 +137,17 @@ public class DolphinEventHandler {
     }
 
     @SubscribeEvent
-    public static void onDolphinContainerOpen(PlayerContainerEvent.Open event) {
-        DolphinsFriends.LOGGER.info("Open Inventory server");
+    public static void onDolphinInventoryOpen(InputEvent.KeyInputEvent event) {
+        if(event.getAction() == GLFW.GLFW_PRESS && event.getKey() == KEY_INVENTORY.getKey().getKeyCode()) {
+            ClientPlayerEntity playerEntity = Minecraft.getInstance().player;
 
-        ServerPlayerEntity playerEntity = (ServerPlayerEntity) event.getPlayer();
+            if(playerEntity != null && playerEntity.getRidingEntity() instanceof RidableDolphinEnitity) {
+                RidableDolphinEnitity dolphin = (RidableDolphinEnitity) playerEntity.getRidingEntity();
 
-        if(playerEntity.getRidingEntity() instanceof RidableDolphinEnitity) {
-            RidableDolphinEnitity dolphin = (RidableDolphinEnitity) playerEntity.getRidingEntity();
-
-            DolphinsFriends.LOGGER.info("Hook fired");
-
-            playerEntity.openContainer = new RidableDolphinContainer(playerEntity.currentWindowId, playerEntity.inventory, dolphin.getInventory());
+                PacketHandler.instance.sendToServer(new MessageOpenDolphinInventory(dolphin.getEntityId()));
+            }
         }
     }
 
-    @SubscribeEvent
-    public static void onDolphinGuiOpen(GuiOpenEvent event) {
-        DolphinsFriends.LOGGER.info("Open inventory client");
-        ClientPlayerEntity player = Minecraft.getInstance().player;
 
-
-        if(player != null && player.getRidingEntity() instanceof RidableDolphinEnitity && event.getGui() instanceof ContainerScreen) {
-            ContainerScreen<?> oldScreen = (ContainerScreen) event.getGui();
-            Container oldContainer = oldScreen.getContainer();
-
-            RidableDolphinEnitity dolphin = (RidableDolphinEnitity) player.getRidingEntity();
-
-            RidableDolphinContainer container = new RidableDolphinContainer(oldContainer.windowId, player.inventory, dolphin.getInventory());
-            RidableDolphinScreen screen = new RidableDolphinScreen(container, player.inventory, dolphin.getDisplayName());
-
-            player.openContainer = container;
-            event.setGui(screen);
-
-
-        }
-    }
 }

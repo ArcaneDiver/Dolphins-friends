@@ -12,27 +12,27 @@ import net.minecraft.inventory.container.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.datafix.fixes.ItemSpawnEggSplit;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nullable;
 
 public class RidableDolphinContainer extends Container {
 
     private PlayerInventory playerInventory;
-    private IInventory inventory;
+    private IItemHandler inventory;
 
     public RidableDolphinContainer(int windowID, PlayerInventory playerInventory) {
-        this(windowID, playerInventory, new Inventory(1));
+        this(windowID, playerInventory, new ItemStackHandler());
     }
 
-    public RidableDolphinContainer(int windowID, PlayerInventory playerInventory, IInventory inventory) {
+    public RidableDolphinContainer(int windowID, PlayerInventory playerInventory, IItemHandler inventory) {
         super(ModContainers.RIDABLE_DOLPHIN.get(), windowID);
 
-        assertInventorySize(inventory, 1);
 
         this.playerInventory = playerInventory;
         this.inventory = inventory;
-
-        inventory.openInventory(playerInventory.player);
 
         this.addSlot(new SlotSonarRidableDolphin(inventory, 0, 80, 20));
         

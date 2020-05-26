@@ -1,4 +1,4 @@
-package com.arcanediver.dolphins_friends.event;
+package com.arcanediver.dolphins_friends.common;
 
 import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.common.entity.EntitySonarDataHandler.*;

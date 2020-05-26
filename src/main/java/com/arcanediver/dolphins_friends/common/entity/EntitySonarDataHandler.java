@@ -35,12 +35,7 @@ public class EntitySonarDataHandler {
         MinecraftForge.EVENT_BUS.register(EntitySonarDataHandler.class);
     }
 
-    @SubscribeEvent
-    public static void attachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if(event.getObject() instanceof PlayerEntity) {
-            event.addCapability(new ResourceLocation(DolphinsFriends.MOD_ID, "sonar_data"), new EntitySonarDataHandler.Provider());
-        }
-    }
+
 
     public interface ISonarData {
 

@@ -4,6 +4,7 @@ import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.inventory.container.RidableDolphinContainer;
 import com.arcanediver.dolphins_friends.utils.RegistryHandler;
 import com.mojang.brigadier.Message;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.HorseInventoryScreen;
 import net.minecraft.client.renderer.entity.HorseRenderer;
 import net.minecraft.command.arguments.MessageArgument;
@@ -34,14 +35,25 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextComponentUtils;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.common.util.NonNullSupplier;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.*;
 
 public class RidableDolphinEnitity extends DolphinEntity implements INamedContainerProvider {
 
-    protected IInventory inventory = new Inventory(1);
+    @CapabilityInject(IItemHandler.class)
+    public static Capability<IItemHandler> ITEM_HANDLER_CAPABILITY = null;
+
+    protected IItemHandler inventory = new ItemStackHandler();
 
     public RidableDolphinEnitity(EntityType<RidableDolphinEnitity> type, World worldIn) {
         super(type, worldIn);
@@ -52,23 +64,13 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
         // I dont won't AI
     }
 
-    public void setInventory(IInventory inventory) {
-        this.inventory = inventory;
-    }
 
-    public IInventory getInventory() {
-        return inventory;
-    }
 
     @Override
     protected void dropInventory() {
         super.dropInventory();
 
-        for(int i = 0; i < this.inventory.getSizeInventory(); i++) {
-            ItemStack stack = this.inventory.getStackInSlot(i);
-            if(!stack.isEmpty())
-                this.entityDropItem(stack);
-        }
+        this.entityDropItem(inventory.getStackInSlot(0));
     }
 
     @Override
@@ -147,10 +149,20 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
         return super.processInteract(player, hand);
     }
 
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
+        if(cap == ITEM_HANDLER_CAPABILITY) {
+            return ITEM_HANDLER_CAPABILITY.orEmpty(cap, LazyOptional.of(() ->inventory));
+        } else {
+            return super.getCapability(cap);
+        }
+    }
+
     @Nullable
     @Override
     public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
-        return new RidableDolphinContainer(id, inventory, getInventory());
+        return new RidableDolphinContainer(id, inventory, this.inventory);
     }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {
