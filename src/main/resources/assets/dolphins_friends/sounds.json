@@ -1,0 +1,6 @@
+{
+  "entity.echo": {
+    "subtitle": "subtitle.dolphins_friends.entity.echo",
+    "sounds": [ "dolphins_friends:entity/echo" ]
+  }
+}

@@ -6,11 +6,8 @@ import com.arcanediver.dolphins_friends.common.CommonEvents;
 import com.arcanediver.dolphins_friends.common.entity.EntitySonarDataHandler;
 import com.arcanediver.dolphins_friends.common.DolphinEventHandler;
 import com.arcanediver.dolphins_friends.common.TickEventHandler;
-import com.arcanediver.dolphins_friends.init.ModContainers;
-import com.arcanediver.dolphins_friends.init.ModEntities;
-import com.arcanediver.dolphins_friends.init.ModItems;
+import com.arcanediver.dolphins_friends.init.*;
 import com.arcanediver.dolphins_friends.network.PacketHandler;
-import com.arcanediver.dolphins_friends.utils.RegistryHandler;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -30,6 +27,7 @@ public class DolphinsFriends {
 
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "dolphins_friends";
+    public static final int TICK_PER_SECOND = 20;
 
 
     public DolphinsFriends() {
@@ -38,11 +36,10 @@ public class DolphinsFriends {
         ModEntities.ENTITY_TYPES.register(eventBus);
         ModItems.ITEMS.register(eventBus);
         ModContainers.CONTAINER_TYPES.register(eventBus);
+        ModSounds.SOUNDS.register(eventBus);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
-
-        RegistryHandler.init();
 
 
         MinecraftForge.EVENT_BUS.register(DolphinEventHandler.class);
@@ -50,25 +47,23 @@ public class DolphinsFriends {
         MinecraftForge.EVENT_BUS.register(CommonEvents.class);
     }
 
-    public void onClientSetup(FMLCommonSetupEvent event) {
-        ClientRegistry.registerKeyBinding(DolphinEventHandler.KEY_SONAR);
-        ClientRegistry.registerKeyBinding(DolphinEventHandler.KEY_INVENTORY);
-
-        ScreenManager.registerFactory(ModContainers.RIDABLE_DOLPHIN.get(), RidableDolphinScreen::new);
-    }
-
-    public void onCommonSetup(FMLClientSetupEvent event) {
+    public void onCommonSetup(FMLCommonSetupEvent event) {
         RenderRegistry.registryRenders();
         PacketHandler.register();
         EntitySonarDataHandler.register();
+    }
 
+    public void onClientSetup(FMLClientSetupEvent event) {
+        ClientRegistry.registerKeyBinding(DolphinEventHandler.KEY_SONAR);
+        ClientRegistry.registerKeyBinding(DolphinEventHandler.KEY_INVENTORY);
+        ScreenManager.registerFactory(ModContainers.RIDABLE_DOLPHIN.get(), RidableDolphinScreen::new);
     }
 
 
     public static final ItemGroup TAB = new ItemGroup("dolphins_friends") {
         @Override
         public ItemStack createIcon() {
-            return new ItemStack(RegistryHandler.RUBY.get());
+            return new ItemStack(ModItems.SONAR.get());
         }
     };
 }

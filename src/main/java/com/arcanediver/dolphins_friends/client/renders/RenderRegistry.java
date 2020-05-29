@@ -2,7 +2,6 @@ package com.arcanediver.dolphins_friends.client.renders;
 
 
 import com.arcanediver.dolphins_friends.init.ModEntities;
-import com.arcanediver.dolphins_friends.utils.RegistryHandler;
 import net.minecraft.client.renderer.entity.DolphinRenderer;
 import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraftforge.api.distmarker.Dist;

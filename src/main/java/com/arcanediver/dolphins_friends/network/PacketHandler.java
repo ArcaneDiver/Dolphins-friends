@@ -3,9 +3,12 @@ package com.arcanediver.dolphins_friends.network;
 import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.network.message.IMessage;
 import com.arcanediver.dolphins_friends.network.message.MessageOpenDolphinInventory;
+import com.arcanediver.dolphins_friends.network.message.MessageSyncDolphinInventory;
+import net.minecraft.entity.monster.DrownedEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class PacketHandler {
 
@@ -24,6 +27,7 @@ public class PacketHandler {
                 .simpleChannel();
 
         register(MessageOpenDolphinInventory.class, new MessageOpenDolphinInventory());
+        register(MessageSyncDolphinInventory.class, new MessageSyncDolphinInventory());
     }
 
     private static <T> void register(Class<T> clazz, IMessage<T> message)

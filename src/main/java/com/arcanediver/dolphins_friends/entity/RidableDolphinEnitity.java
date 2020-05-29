@@ -2,44 +2,30 @@ package com.arcanediver.dolphins_friends.entity;
 
 import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.inventory.container.RidableDolphinContainer;
-import com.arcanediver.dolphins_friends.utils.RegistryHandler;
-import com.mojang.brigadier.Message;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.HorseInventoryScreen;
-import net.minecraft.client.renderer.entity.HorseRenderer;
-import net.minecraft.command.arguments.MessageArgument;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.DolphinEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.entity.passive.horse.HorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.HorseInventoryContainer;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextComponentUtils;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullSupplier;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -47,6 +33,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.*;
+import java.util.List;
 
 public class RidableDolphinEnitity extends DolphinEntity implements INamedContainerProvider {
 
@@ -65,6 +52,22 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
     }
 
 
+    @Override
+    public void writeAdditional(CompoundNBT compound) {
+        super.writeAdditional(compound);
+
+
+        compound.put("inventory", inventory.getStackInSlot(0).write(new CompoundNBT()));
+    }
+
+    @Override
+    public void readAdditional(CompoundNBT compound) {
+        super.readAdditional(compound);
+
+
+        this.inventory.insertItem(0, ItemStack.read(compound.getCompound("inventory")), false);
+
+    }
 
     @Override
     protected void dropInventory() {
@@ -76,6 +79,9 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
     @Override
     public void travel(Vec3d initialDir) {
         if(this.isBeingRidden()) {
+            this.setNoAI(true);
+
+
             LivingEntity passenger = (LivingEntity) getPassengers().get(0);
 
             rotationYaw = passenger.rotationYaw;
@@ -113,6 +119,7 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
             this.setAIMoveSpeed(0.1f);
             super.travel(dir);
         } else {
+            this.setNoAI(false);
             super.travel(initialDir);
         }
     }
@@ -135,8 +142,7 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
     @Override
     public boolean processInteract(PlayerEntity player, Hand hand) {
         if(!world.isRemote) {
-            if(player.getHeldItem(hand).getItem() == Items.GOLDEN_CARROT) {
-                DolphinsFriends.LOGGER.debug("Interaction");
+            if(player.getHeldItem(hand).getItem() == Items.GOLDEN_CARROT) { // TEST
                 NetworkHooks.openGui((ServerPlayerEntity) player, this, buffer -> buffer.writeInt(this.getEntityId()));
 
                 return true;
@@ -162,7 +168,7 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
     @Nullable
     @Override
     public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player) {
-        return new RidableDolphinContainer(id, inventory, this.inventory);
+        return new RidableDolphinContainer(id, inventory, this.inventory, this.getEntityId());
     }
 
     public boolean attackEntityFrom(DamageSource source, float amount) {

@@ -31,8 +31,6 @@ public class EntitySonarDataHandler {
     public static void register() {
         CapabilityManager.INSTANCE.register(ISonarData.class, new EntitySonarDataHandler.Storage(), SonarData::new);
 
-
-        MinecraftForge.EVENT_BUS.register(EntitySonarDataHandler.class);
     }
 
 
@@ -41,14 +39,17 @@ public class EntitySonarDataHandler {
 
         void setTimeLeft(Long time);
         void setEntities(List<Integer> entities);
+        void setCooldown(Integer ticks);
 
         Optional<Long> getTimeLeft();
         Optional<List<Integer>>  getEntities();
+        Integer getCooldown();
     }
 
     public static class SonarData implements ISonarData {
         private Long timeLeft = null;
         private List<Integer> entities = null;
+        private Integer cooldown = 0;
 
         @Override
         public void setTimeLeft(Long time) {
@@ -61,6 +62,12 @@ public class EntitySonarDataHandler {
         }
 
         @Override
+        public void setCooldown(Integer ticks) {
+            this.cooldown = ticks;
+        }
+
+
+        @Override
         public Optional<Long> getTimeLeft() {
             return Optional.ofNullable(timeLeft);
         }
@@ -68,6 +75,11 @@ public class EntitySonarDataHandler {
         @Override
         public Optional<List<Integer>> getEntities() {
             return Optional.ofNullable(entities);
+        }
+
+        @Override
+        public Integer getCooldown() {
+            return cooldown;
         }
     }
 
@@ -91,6 +103,8 @@ public class EntitySonarDataHandler {
             if(instance.getTimeLeft().isPresent()) {
                 compoundNBT.putLong("time_left", instance.getTimeLeft().get());
             }
+
+            compoundNBT.putInt("cooldown", instance.getCooldown());
 
             return compoundNBT;
         }
@@ -118,6 +132,8 @@ public class EntitySonarDataHandler {
 
                 instance.setTimeLeft(timeLeft);
             }
+
+            instance.setCooldown(compoundNBT.getInt("cooldown"));
         }
     }
 

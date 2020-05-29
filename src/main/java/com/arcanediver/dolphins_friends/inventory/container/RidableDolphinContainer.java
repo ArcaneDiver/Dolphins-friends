@@ -2,6 +2,8 @@ package com.arcanediver.dolphins_friends.inventory.container;
 
 import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.init.ModContainers;
+import com.arcanediver.dolphins_friends.network.PacketHandler;
+import com.arcanediver.dolphins_friends.network.message.MessageSyncDolphinInventory;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.passive.horse.HorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,10 +26,10 @@ public class RidableDolphinContainer extends Container {
     private IItemHandler inventory;
 
     public RidableDolphinContainer(int windowID, PlayerInventory playerInventory) {
-        this(windowID, playerInventory, new ItemStackHandler());
+        this(windowID, playerInventory, new ItemStackHandler(), -1);
     }
 
-    public RidableDolphinContainer(int windowID, PlayerInventory playerInventory, IItemHandler inventory) {
+    public RidableDolphinContainer(int windowID, PlayerInventory playerInventory, IItemHandler inventory, int dolphinID) {
         super(ModContainers.RIDABLE_DOLPHIN.get(), windowID);
 
 
@@ -54,7 +56,9 @@ public class RidableDolphinContainer extends Container {
 
             @Override
             public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
-                DolphinsFriends.LOGGER.info("slot called");
+                if(slotInd == 0) {
+                    //PacketHandler.instance.sendToServer(new MessageSyncDolphinInventory(inventory.getStackInSlot(0), dolphinID));
+                }
             }
 
             @Override

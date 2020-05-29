@@ -11,7 +11,7 @@ public class ModItems {
 
     public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, DolphinsFriends.MOD_ID);
 
-    public static final RegistryObject<Item> SONAR = registry("sonar", new SonarItem(new Item.Properties()
+    public static final RegistryObject<Item> SONAR = registry("sonar", new Item(new Item.Properties()
             .group(DolphinsFriends.TAB)
     ));
 

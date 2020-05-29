@@ -6,7 +6,8 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.ModIds;
 import net.minecraft.util.ResourceLocation;
 
-
+// WIP
+@JeiPlugin
 public class DolphinsFriendsJEIPlugin implements IModPlugin {
 
     public static DolphinsFriendsJEIPlugin INSTANCE;

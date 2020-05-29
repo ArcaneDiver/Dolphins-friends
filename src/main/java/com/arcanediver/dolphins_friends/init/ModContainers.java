@@ -18,7 +18,8 @@ public class ModContainers {
 
     public static final RegistryObject<ContainerType<RidableDolphinContainer>> RIDABLE_DOLPHIN = register("ridable_dolphin", (IContainerFactory<RidableDolphinContainer>) (winID, playerInvententory, data) -> {
         RidableDolphinEnitity dolphin = (RidableDolphinEnitity) playerInvententory.player.world.getEntityByID(data.readInt());
-        return new RidableDolphinContainer(winID, playerInvententory, dolphin.getCapability(RidableDolphinEnitity.ITEM_HANDLER_CAPABILITY).orElse(null));
+
+        return new RidableDolphinContainer(winID, playerInvententory, dolphin.getCapability(RidableDolphinEnitity.ITEM_HANDLER_CAPABILITY).orElse(null), dolphin.getEntityId());
     });
 
     private static <T extends Container> RegistryObject<ContainerType<T>> register(String id, ContainerType.IFactory<T> factory) {
