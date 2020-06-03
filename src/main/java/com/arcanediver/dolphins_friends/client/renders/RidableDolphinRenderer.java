@@ -21,9 +21,6 @@ public class RidableDolphinRenderer extends MobRenderer<RidableDolphinEnitity, D
 
     }
 
-    /**
-     * Returns the location of an entity's texture.
-     */
     public ResourceLocation getEntityTexture(RidableDolphinEnitity entity) {
         return DOLPHIN_LOCATION;
     }

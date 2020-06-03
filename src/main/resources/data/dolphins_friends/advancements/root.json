@@ -1,0 +1,20 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:dolphin_spawn_egg"
+    },
+    "title": {
+      "translate": "itemGroup.dolphins_friends"
+    },
+    "description": {
+      "translate": "advancement.dolphins_friends.root.desc"
+    },
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "ride_dolphin": {
+      "trigger": "dolphins_friends:ride_dolphin"
+    }
+  }
+}

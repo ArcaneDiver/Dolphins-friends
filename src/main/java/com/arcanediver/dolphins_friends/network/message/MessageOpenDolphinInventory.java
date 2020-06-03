@@ -3,6 +3,8 @@ package com.arcanediver.dolphins_friends.network.message;
 import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.entity.RidableDolphinEnitity;
 import com.arcanediver.dolphins_friends.inventory.container.RidableDolphinContainer;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.main.Main;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -37,8 +39,9 @@ public class MessageOpenDolphinInventory implements IMessage<MessageOpenDolphinI
     public void handle(MessageOpenDolphinInventory message, Supplier<NetworkEvent.Context> supplier) {
         supplier.get().enqueueWork(() -> {
             ServerPlayerEntity player = supplier.get().getSender();
+
             if(player != null) {
-                World world = player.world;
+                ServerWorld world = (ServerWorld) player.world;
                 Entity entity = world.getEntityByID(message.entityID);
 
                 if(entity instanceof RidableDolphinEnitity) {

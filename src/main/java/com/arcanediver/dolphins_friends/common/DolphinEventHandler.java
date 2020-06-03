@@ -5,6 +5,7 @@ import com.arcanediver.dolphins_friends.DolphinsFriends;
 import com.arcanediver.dolphins_friends.client.screen.RidableDolphinScreen;
 import com.arcanediver.dolphins_friends.common.entity.EntitySonarDataHandler;
 import com.arcanediver.dolphins_friends.entity.RidableDolphinEnitity;
+import com.arcanediver.dolphins_friends.init.ModAdvancements;
 import com.arcanediver.dolphins_friends.init.ModEntities;
 import com.arcanediver.dolphins_friends.init.ModItems;
 import com.arcanediver.dolphins_friends.init.ModSounds;
@@ -64,6 +65,7 @@ public class DolphinEventHandler {
     public static final KeyBinding KEY_SONAR = new KeyBinding(String.format("key.%s.sonar", DolphinsFriends.MOD_ID), GLFW.GLFW_KEY_U, String.format("key.categories.%s", DolphinsFriends.MOD_ID));
     public static final KeyBinding KEY_INVENTORY = new KeyBinding(String.format("key.%s.inventory", DolphinsFriends.MOD_ID), GLFW.GLFW_KEY_I, String.format("key.categories.%s", DolphinsFriends.MOD_ID));
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onDolphinInteract(PlayerInteractEvent.EntityInteract e) {
 
@@ -79,6 +81,7 @@ public class DolphinEventHandler {
                 player.startRiding(sobstitue);
                 dolphinEntity.remove();
 
+                ModAdvancements.RIDE_DOLPHIN.trigger((ServerPlayerEntity) player);
             }
 
         }
@@ -101,6 +104,7 @@ public class DolphinEventHandler {
         }
     }*/
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onSonarActivation(InputEvent.KeyInputEvent event) {
         if(event.getAction() == GLFW.GLFW_PRESS && event.getKey() == KEY_SONAR.getKey().getKeyCode()) {
@@ -167,6 +171,7 @@ public class DolphinEventHandler {
         }
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onDolphinInventoryOpen(InputEvent.KeyInputEvent event) {
         if(event.getAction() == GLFW.GLFW_PRESS && event.getKey() == KEY_INVENTORY.getKey().getKeyCode()) {

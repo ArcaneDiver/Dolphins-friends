@@ -5,16 +5,24 @@ import com.arcanediver.dolphins_friends.inventory.container.RidableDolphinContai
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.DolphinEntity;
+import net.minecraft.entity.passive.fish.AbstractFishEntity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.entity.passive.horse.HorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ParticleType;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
@@ -23,9 +31,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentUtils;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.coremod.api.ASMAPI;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -34,6 +45,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.util.List;
+import java.util.UUID;
 
 public class RidableDolphinEnitity extends DolphinEntity implements INamedContainerProvider {
 
@@ -41,6 +53,10 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
     public static Capability<IItemHandler> ITEM_HANDLER_CAPABILITY = null;
 
     protected IItemHandler inventory = new ItemStackHandler();
+    private boolean tamed = true;
+
+    @Nullable
+    private UUID owner = null;
 
     public RidableDolphinEnitity(EntityType<RidableDolphinEnitity> type, World worldIn) {
         super(type, worldIn);
@@ -48,25 +64,33 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
 
     @Override
     protected void registerGoals() {
-        // I dont won't AI
+        super.registerGoals();
     }
-
 
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
 
-
         compound.put("inventory", inventory.getStackInSlot(0).write(new CompoundNBT()));
+        compound.putBoolean("tamed", tamed);
+
+        if(owner != null) {
+            compound.putUniqueId("owner", owner);
+        }
+
     }
 
     @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
 
-
         this.inventory.insertItem(0, ItemStack.read(compound.getCompound("inventory")), false);
 
+        this.tamed = compound.getBoolean("tamed");
+
+        if(compound.contains("owner")) {
+            owner = compound.getUniqueId("owner");
+        }
     }
 
     @Override
@@ -79,8 +103,6 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
     @Override
     public void travel(Vec3d initialDir) {
         if(this.isBeingRidden()) {
-            this.setNoAI(true);
-
 
             LivingEntity passenger = (LivingEntity) getPassengers().get(0);
 
@@ -92,11 +114,6 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
             rotationYawHead = renderYawOffset;
 
             float f = passenger.moveStrafing * 0.5F;
-            float f1 = passenger.moveForward;
-
-            if (f1 <= 0.0F) {
-                f1 *= 0.25F;
-            }
 
             Vec3d dir;
 
@@ -119,7 +136,6 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
             this.setAIMoveSpeed(0.1f);
             super.travel(dir);
         } else {
-            this.setNoAI(false);
             super.travel(initialDir);
         }
     }
@@ -142,17 +158,60 @@ public class RidableDolphinEnitity extends DolphinEntity implements INamedContai
     @Override
     public boolean processInteract(PlayerEntity player, Hand hand) {
         if(!world.isRemote) {
-            if(player.getHeldItem(hand).getItem() == Items.GOLDEN_CARROT) { // TEST
+            if(player.isShiftKeyDown()) { // TEST
                 NetworkHooks.openGui((ServerPlayerEntity) player, this, buffer -> buffer.writeInt(this.getEntityId()));
-
-                return true;
             } else {
-                player.startRiding(this);
-                return true;
+                if(this.isTame()) {
+                    player.startRiding(this);
+                } else {
+                    ItemStack itemStack = player.getHeldItem(hand);
+
+                    if(itemStack.getItem() == Items.SALMON || itemStack.getItem() == Items.COOKED_SALMON) {
+                        this.setOwner(player.getUniqueID());
+                        this.tamed = true;
+
+                        this.spawnTamedParticles();
+                    }
+                }
             }
+
+            return true;
         }
 
         return super.processInteract(player, hand);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    protected void spawnTamedParticles() {
+        IParticleData particleData = ParticleTypes.HEART;
+
+        for(int i = 0; i < 7; i++) {
+            double xSpeed = this.rand.nextGaussian() * 0.02D;
+            double ySpeed = this.rand.nextGaussian() * 0.02D;
+            double zSpeed = this.rand.nextGaussian() * 0.02D;
+
+            this.world.addParticle(
+                    particleData,
+                    this.getPosXRandom(1.0D),
+                    this.getPosYRandom() + 0.5D,
+                    this.getPosZRandom(1.0D),
+                    xSpeed,
+                    ySpeed,
+                    zSpeed
+            );
+        }
+    }
+
+    protected void handleEating(PlayerEntity player, Item item) {
+        DolphinsFriends.LOGGER.info("eating");
+    }
+
+    public boolean isTame() {
+        return this.tamed;
+    }
+
+    public void setOwner(UUID owner) {
+        this.owner = owner;
     }
 
     @Nonnull

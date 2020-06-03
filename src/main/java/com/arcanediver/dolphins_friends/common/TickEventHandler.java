@@ -15,6 +15,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class TickEventHandler {
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onTickSonarCheck(TickEvent.PlayerTickEvent e) {
 
@@ -45,6 +46,7 @@ public class TickEventHandler {
         }
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onSonarCooldown(TickEvent.PlayerTickEvent event) {
         PlayerEntity player = event.player;

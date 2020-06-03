@@ -51,6 +51,8 @@ public class DolphinsFriends {
         RenderRegistry.registryRenders();
         PacketHandler.register();
         EntitySonarDataHandler.register();
+
+        ModAdvancements.init();
     }
 
     public void onClientSetup(FMLClientSetupEvent event) {

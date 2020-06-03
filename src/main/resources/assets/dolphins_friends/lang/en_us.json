@@ -8,7 +8,13 @@
 
   "subtitle.dolphins_friends.echo": "Dolphin's echo",
 
+  "jei.dolphins_friends.desc.sonar": "Scan the local area",
+
   "key.categories.dolphins_friends": "Dolphin's friends",
   "key.dolphins_friends.sonar": "Sonar",
-  "key.dolphins_friends.inventory": "Open inventory"
+  "key.dolphins_friends.inventory": "Open inventory",
+
+
+
+  "advancement.dolphins_friends.root.desc": "Advancement description"
 }
